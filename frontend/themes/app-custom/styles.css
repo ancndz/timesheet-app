@@ -1,0 +1,49 @@
+@import "theme-editor.css";
+
+vaadin-login-overlay-wrapper::part(brand) {
+    visibility: hidden;
+    display: none;
+}
+
+vaadin-grid.cooperation-grid::part(non-active) {
+    background-color: var(--lumo-warning-color-10pct);
+}
+vaadin-grid.cooperation-grid::part(archived) {
+    background-color: var(--lumo-error-color-10pct);
+}
+vaadin-grid.day-card-grid::part(past) {
+    background-color: var(--lumo-contrast-10pct);
+}
+vaadin-grid.day-card-grid::part(future) {
+    background-color: var(--lumo-primary-color-5pct);
+}
+
+.notification-component {
+    background: var(--lumo-base-color) linear-gradient(hsla(214, 65%, 85%, 0.06), hsla(214, 65%, 85%, 0.06));
+    border-radius: var(--lumo-border-radius-l);
+    box-shadow: 0 0 0 1px var(--lumo-contrast-10pct), var(--lumo-box-shadow-l);
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-m);
+    font-weight: 400;
+    line-height: var(--lumo-line-height-s);
+    letter-spacing: 0;
+    text-transform: none;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    padding: var(--lumo-space-wide-l);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.notification-component[theme="contrast"] {
+    background: var(--lumo-contrast-80pct);
+    color: var(--lumo-base-color);
+}
+
+vaadin-avatar.notification-avatar[theme="contrast"] {
+    background: var(--lumo-contrast-90pct);
+    color: var(--lumo-base-color);
+}
