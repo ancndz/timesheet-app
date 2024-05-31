@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * @since 2024.04.18
  */
 @SpringBootTest
-@ActiveProfiles({ "h2-test", "dev" })
+@ActiveProfiles({ "in-memory" })
 public class AbstractTest {
 
     @Autowired

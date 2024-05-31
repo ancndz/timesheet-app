@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  timesheet-app:
+    image: 'timesheet-app:latest'
+    container_name: t-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod,postgres
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/timesheet
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=1
+      - SERVER_PORT=80
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    container_name: t-postgres
+    environment:
+      - POSTGRES_DB=timesheet
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=1
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
