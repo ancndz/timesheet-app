@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Profile;
  * @since 2024.04.22
  */
 @Configuration
-@Profile({ "h2", "postgres" })
+@Profile({ "postgres" })
 public class H2Configuration {
 
 }

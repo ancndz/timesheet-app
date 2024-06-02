@@ -1,6 +1,7 @@
 package ru.ancndz.timeapp.security;
 
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -21,6 +22,10 @@ import ru.ancndz.timeapp.ui.view.LoginView;
 @Configuration
 public class SecurityConfig extends VaadinWebSecurity {
 
+    private @Value("remember-me.cookie.name") String rememberMe;
+
+    private @Value("server.servlet.session.cookie.name") String sessionCookie;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -31,8 +36,10 @@ public class SecurityConfig extends VaadinWebSecurity {
         http.authorizeHttpRequests(
                 auth -> auth.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/images/*.png"))
                         .permitAll())
-                .rememberMe(configurer -> configurer.tokenValiditySeconds(86400))
-                .logout(logout -> logout.deleteCookies("JSESSIONID"));
+                .rememberMe(conf -> {
+                    conf.rememberMeCookieName(rememberMe);
+                })
+                .logout(logout -> logout.deleteCookies(sessionCookie));
         super.configure(http);
         setLoginView(http, LoginView.class);
     }

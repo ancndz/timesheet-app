@@ -14,6 +14,13 @@ pipeline {
             }
         }
 
+        stage('Clean old t-app image') {
+            steps {
+                sh 'docker stop t-app || true'
+                sh 'docker remove t-app || true'
+            }
+        }
+
         stage('Run Docker Compose') {
             steps {
                 sh 'docker compose up -d'
