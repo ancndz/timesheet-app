@@ -1,11 +1,8 @@
 version: '3.8'
 services:
   timesheet-app:
-    image: 'timesheet-app:latest'
+    image: timesheet-app:0.1.0
     container_name: t-app
-    build:
-      context: .
-      dockerfile: Dockerfile
     ports:
       - "80:80"
     environment:

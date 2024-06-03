@@ -23,7 +23,7 @@
         <querydsl.version>5.0.0</querydsl.version>
         <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
         <zxing.version>3.4.1</zxing.version>
-        <docker.local-registry>localhost</docker.local-registry>
+        <docker.local-registry>localhost:5000</docker.local-registry>
         <skipDocker>false</skipDocker>
     </properties>
 
@@ -152,7 +152,7 @@
                             <arguments>
                                 <argument>build</argument>
                                 <argument>-t</argument>
-                                <argument>${docker.local-registry}/${project.artifactId}:${project.version}
+                                <argument>${project.artifactId}:${project.version}
                                 </argument>
                                 <argument>.</argument>
                             </arguments>
@@ -166,7 +166,7 @@
                         </goals>
                         <configuration>
                             <executable>docker</executable>
-                            <skip>${skipDocker}</skip>
+                            <skip>true</skip>
                             <arguments>
                                 <argument>push</argument>
                                 <argument>${docker.local-registry}/${project.artifactId}:${project.version}
