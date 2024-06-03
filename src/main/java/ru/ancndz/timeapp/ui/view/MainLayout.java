@@ -7,6 +7,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
@@ -16,10 +17,12 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import ru.ancndz.timeapp.core.ApplicationInfo;
 import ru.ancndz.timeapp.ui.component.SideLinkNav;
 import ru.ancndz.timeapp.ui.component.ThemeSwitchButton;
 import ru.ancndz.timeapp.user.domain.User;
 
+import java.text.MessageFormat;
 import java.util.Optional;
 
 /**
@@ -32,7 +35,9 @@ public class MainLayout extends AppLayout {
 
     public static final Logger log = LoggerFactory.getLogger(MainLayout.class);
 
-    public MainLayout(final ApplicationContext applicationContext, final AuthenticationContext authenticationContext) {
+    public MainLayout(final ApplicationContext applicationContext,
+            final AuthenticationContext authenticationContext,
+            final ApplicationInfo applicationInfo) {
         final Optional<User> currentScheduleUser = authenticationContext.getAuthenticatedUser(User.class);
 
         final H1 title = new H1(getTranslation("app.title"));
@@ -54,8 +59,20 @@ public class MainLayout extends AppLayout {
         sideLinkNavWrapper.setSpacing(false);
         sideLinkNavWrapper.setPadding(false);
         final Scroller scroller = new Scroller(sideLinkNavWrapper);
-        scroller.setClassName(LumoUtility.Padding.SMALL);
-        addToDrawer(scroller);
+        scroller.setMaxWidth("intrinsic");
+        final Span appVer = new Span(MessageFormat.format("{0} {1} v. {2}:{3}",
+                applicationInfo.getAppGroup(),
+                applicationInfo.getAppName(),
+                applicationInfo.getVersionNumber(),
+                applicationInfo.getBuildNumber()));
+        appVer.addClassNames(LumoUtility.TextColor.TERTIARY);
+
+        final VerticalLayout scrollerWrapper = new VerticalLayout(scroller, appVer);
+        scrollerWrapper.setClassName(LumoUtility.Padding.SMALL);
+        scrollerWrapper.expand(scroller);
+        scrollerWrapper.setHeightFull();
+        scrollerWrapper.setSpacing(false);
+        addToDrawer(scrollerWrapper);
 
         currentScheduleUser.ifPresentOrElse(user -> {
             final H2 welcomeText =
