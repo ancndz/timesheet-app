@@ -3,6 +3,7 @@ package ru.ancndz.timeapp;
 import com.vaadin.flow.i18n.I18NProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableAsync;
+import ru.ancndz.timeapp.core.ApplicationInfo;
 import ru.ancndz.timeapp.security.SecurityConfig;
 
 import java.util.List;
@@ -33,6 +35,13 @@ public class TimesheetApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
         SpringApplication.run(TimesheetApplication.class, args);
+    }
+
+    @Bean
+    public ApplicationRunner appInfo(final ApplicationInfo applicationInfo) {
+        return args -> {
+            log.info("Current version: {}:{}", applicationInfo.getVersionNumber(), applicationInfo.getBuildNumber());
+        };
     }
 
     /**

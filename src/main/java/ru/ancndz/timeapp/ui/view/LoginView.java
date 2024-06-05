@@ -2,6 +2,8 @@ package ru.ancndz.timeapp.ui.view;
 
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -12,6 +14,10 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.security.AuthenticationContext;
+import com.vaadin.flow.theme.lumo.LumoUtility;
+import ru.ancndz.timeapp.core.ApplicationInfo;
+
+import java.text.MessageFormat;
 
 /**
  * Представление входа в систему.
@@ -31,18 +37,33 @@ public class LoginView extends Composite<LoginOverlay> implements BeforeEnterObs
 
     private transient final AuthenticationContext authenticationContext;
 
-    public LoginView(final AuthenticationContext authenticationContext) {
+    public LoginView(final AuthenticationContext authenticationContext, final ApplicationInfo applicationInfo) {
         this.authenticationContext = authenticationContext;
+
         getContent().setAction(LAYOUT_ROUTE);
-
         getContent().setForgotPasswordButtonVisible(false);
-
         final Button registerButton = new Button(getTranslation("app.button.register"), e -> {
             e.getSource().getUI().ifPresent(ui -> ui.navigate(RegisterView.LAYOUT_ROUTE));
         });
         registerButton.setWidthFull();
-        getContent().getFooter().add(registerButton);
+        final Span appVer = new Span(MessageFormat.format("{0} {1} v. {2}:{3}",
+                applicationInfo.getAppGroup(),
+                applicationInfo.getAppName(),
+                applicationInfo.getVersionNumber(),
+                applicationInfo.getBuildNumber()));
+        appVer.addClassNames(LumoUtility.TextColor.TERTIARY);
+        final Div appVerWrapper = new Div(appVer);
+        appVer.addClassNames(LumoUtility.Display.INLINE_FLEX,
+                LumoUtility.Width.FULL,
+                LumoUtility.JustifyContent.CENTER);
+        getContent().getFooter().add(registerButton, appVerWrapper);
 
+        makeI18n();
+
+        getContent().setOpened(true);
+    }
+
+    private void makeI18n() {
         final LoginI18n i18n = LoginI18n.createDefault();
 
         final LoginI18n.Form i18nForm = i18n.getForm();
@@ -58,10 +79,7 @@ public class LoginView extends Composite<LoginOverlay> implements BeforeEnterObs
         i18nErrorMessage.setUsername(getTranslation("app.login-error.username"));
         i18nErrorMessage.setPassword(getTranslation("app.login-error.password"));
         i18n.setErrorMessage(i18nErrorMessage);
-
         getContent().setI18n(i18n);
-
-        getContent().setOpened(true);
     }
 
     @Override
