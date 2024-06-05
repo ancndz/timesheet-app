@@ -60,4 +60,13 @@ public interface CooperateInfoService {
      */
     void save(CooperateInfo item);
 
+    /**
+     * Принятие сотрудничество.
+     * 
+     * @param sender
+     *            отправитель
+     * @param addressee
+     *            адресат
+     */
+    void acceptCooperation(UserInfo sender, UserInfo addressee);
 }

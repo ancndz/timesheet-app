@@ -46,8 +46,7 @@ public class NotificationEntityView extends Composite<VerticalLayout> implements
         authenticationContext.getAuthenticatedUser(User.class).ifPresent(user -> {
             if (notificationService.hasActiveNotifications(user)) {
                 notificationService.getActiveNotifications(user).forEach(notification -> {
-                    final var notificationComponent =
-                            notificationComponentFactory.createNotificationComponent(notification);
+                    final var notificationComponent =  notificationComponentFactory.createNotificationComponent(notification);
                     getContent().add(notificationComponent);
                 });
             } else {

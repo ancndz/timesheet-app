@@ -9,11 +9,15 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.ancndz.timeapp.coop.domain.CooperateInfo;
 import ru.ancndz.timeapp.core.StoreContext;
 import ru.ancndz.timeapp.core.StoreService;
 import ru.ancndz.timeapp.notif.domain.CommonNotification;
+import ru.ancndz.timeapp.notif.domain.NotificationType;
+import ru.ancndz.timeapp.notif.domain.NotificationTypeSystemName;
+import ru.ancndz.timeapp.notif.domain.repo.NotificationTypeRepository;
 import ru.ancndz.timeapp.security.AuthorizationService;
 import ru.ancndz.timeapp.timesheet.WeekUtils;
 import ru.ancndz.timeapp.timesheet.domain.TimesheetEntry;
@@ -87,9 +91,11 @@ public class DevConfiguration {
      * @return командная строка
      */
     @Bean
+    @Order(2)
     public CommandLineRunner dataLoader(final StoreService storeService,
             final PasswordEncoder passwordEncoder,
             final AuthorizationService authorizationService,
+            final NotificationTypeRepository notificationTypeRepository,
             final UserRepository userRepository) {
         return args -> {
             if (userRepository.count() > 2) {
@@ -129,21 +135,26 @@ public class DevConfiguration {
 
             createUsers(worker, defaultPassword, storeContext, authorizationService);
 
-            createNotifications(admin1, worker, storeContext);
+            createNotifications(admin1, worker, notificationTypeRepository, storeContext);
 
             storeService.store(storeContext);
         };
     }
 
-    private void createNotifications(User admin1, User worker, StoreContext storeContext) {
+    private void createNotifications(User admin1,
+            User worker,
+            NotificationTypeRepository notificationTypeRepository,
+            StoreContext storeContext) {
+        final NotificationType commonType =
+                notificationTypeRepository.findBySystemName(NotificationTypeSystemName.COMMON);
         for (int i = 1; i <= 5; i++) {
             final CommonNotification notification = CommonNotification.newNotification()
-                    .withUser(worker.getUserInfo())
+                    .withType(commonType)
+                    .withAddressee(worker.getUserInfo())
                     .withSender(admin1.getUserInfo())
                     .withCreatedAt(LocalDate.now().atTime(10, 0))
                     .withMessage("Test message #" + i)
                     .build();
-
             storeContext.add(notification);
         }
     }

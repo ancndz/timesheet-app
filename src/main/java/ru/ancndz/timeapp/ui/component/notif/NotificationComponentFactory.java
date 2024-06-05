@@ -2,9 +2,8 @@ package ru.ancndz.timeapp.ui.component.notif;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import org.springframework.stereotype.Component;
-import ru.ancndz.timeapp.coop.domain.CoopNotification;
 import ru.ancndz.timeapp.notif.domain.CommonNotification;
-import ru.ancndz.timeapp.notif.domain.NotificationType;
+import ru.ancndz.timeapp.notif.domain.NotificationTypeSystemName;
 import ru.ancndz.timeapp.ui.component.notif.action.NotificationAction;
 import ru.ancndz.timeapp.ui.component.notif.action.service.NotificationActionProvider;
 import ru.ancndz.timeapp.ui.component.notif.action.service.NotificationActionRegistry;
@@ -40,7 +39,9 @@ public class NotificationComponentFactory {
      * Конструктор.
      * 
      * @param notificationActionRegistry
+     *            реестр действий уведомлений
      * @param notificationActionProviders
+     *            провайдеры действий для компонентов уведомлений
      */
     public NotificationComponentFactory(final NotificationActionRegistry notificationActionRegistry,
             final List<NotificationActionProvider> notificationActionProviders) {
@@ -60,12 +61,11 @@ public class NotificationComponentFactory {
      */
     public <T extends CommonNotification> CommonNotificationComponent
             createNotificationComponent(final T notification) {
-        final NotificationType notificationType = notification.getType();
-
-        return switch (notificationType) {
-            case COOPERATION -> createCoopNotificationComponent((CoopNotification) notification);
-            default -> createBaseNotificationComponent(notification);
-        };
+        if (NotificationTypeSystemName.NEW_COOP.equals(notification.getType().getSystemName())) {
+            return createCoopNotificationComponent(notification);
+        } else {
+            return createBaseNotificationComponent(notification);
+        }
     }
 
     /**

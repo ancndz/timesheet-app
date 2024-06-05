@@ -72,10 +72,20 @@ public class CommonNotificationComponent extends Div implements HasComponents, H
      */
     public void setNotification(final CommonNotification notification) {
         if (notification != null) {
-            messageText.setText(notification.getMessage());
-            infoText.setText(getTranslation("app.message.notification.subtext",
-                    notification.getSender().getName(),
-                    notification.getCreatedAt().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))));
+            if (notification.getMessage() != null) {
+                messageText.setText(notification.getMessage());
+            } else {
+                messageText.setText(getTranslation(notification.getType().getMessage()));
+            }
+            if (notification.getSender() != null) {
+                infoText.setText(getTranslation("app.message.notification.subtext",
+                        notification.getSender().getName(),
+                        notification.getCreatedAt().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))));
+            } else {
+                infoText.setText(getTranslation("app.message.notification.subtext.short",
+                        notification.getCreatedAt().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))));
+
+            }
         }
     }
 

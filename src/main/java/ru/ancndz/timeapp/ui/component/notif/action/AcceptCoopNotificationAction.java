@@ -11,6 +11,7 @@ import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import ru.ancndz.timeapp.coop.CooperateInfoService;
 import ru.ancndz.timeapp.notif.NotificationService;
 import ru.ancndz.timeapp.ui.component.notif.CommonNotificationComponent;
 
@@ -29,8 +30,12 @@ public class AcceptCoopNotificationAction implements NotificationAction {
 
     private final NotificationService notificationService;
 
-    public AcceptCoopNotificationAction(final NotificationService notificationService) {
+    private final CooperateInfoService cooperateInfoService;
+
+    public AcceptCoopNotificationAction(final NotificationService notificationService,
+            final CooperateInfoService cooperateInfoService) {
         this.notificationService = notificationService;
+        this.cooperateInfoService = cooperateInfoService;
     }
 
     @Override
@@ -46,7 +51,10 @@ public class AcceptCoopNotificationAction implements NotificationAction {
     @Override
     public ComponentEventListener<ClickEvent<MenuItem>> getAction() {
         return event -> {
-            event.getSource().getContextMenu().getId().ifPresentOrElse(notificationService::acceptCooperation, () -> {
+            event.getSource().getContextMenu().getId().ifPresentOrElse(s -> {
+                final var notification = notificationService.findById(s);
+                cooperateInfoService.acceptCooperation(notification.getSender(), notification.getAddressee());
+            }, () -> {
                 log.error("Notification id is not present for accept-coop action");
             });
         };

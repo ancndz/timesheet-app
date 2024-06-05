@@ -1,12 +1,10 @@
 package ru.ancndz.timeapp.notif.domain;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Inheritance;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.springframework.data.annotation.CreatedDate;
 import ru.ancndz.timeapp.core.domain.AbstractEntity;
 import ru.ancndz.timeapp.user.domain.UserInfo;
 
@@ -16,32 +14,30 @@ import java.util.StringJoiner;
 import java.util.UUID;
 
 /**
- * Общее уведомление.
+ * Модель уведомления.
  *
  * @author Anton Utkaev
  * @since 2024.05.18
  */
 @Entity
 @Table(name = "timetable_notification")
-@Inheritance
-@DiscriminatorColumn(name = "dtype")
-@DiscriminatorValue("base")
 public class CommonNotification extends AbstractEntity {
 
     @Column
     private String message;
 
-    @Column
+    @ManyToOne(optional = false)
     private NotificationType type;
 
     @Column
-    private String status;
+    private NotificationStatus status;
 
-    @Column
+    @Column(nullable = false, updatable = false)
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @ManyToOne
-    private UserInfo user;
+    private UserInfo addressee;
 
     @ManyToOne
     private UserInfo sender;
@@ -65,11 +61,11 @@ public class CommonNotification extends AbstractEntity {
         this.type = type;
     }
 
-    public String getStatus() {
+    public NotificationStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(NotificationStatus status) {
         this.status = status;
     }
 
@@ -81,12 +77,12 @@ public class CommonNotification extends AbstractEntity {
         this.createdAt = localDateTime;
     }
 
-    public UserInfo getUser() {
-        return user;
+    public UserInfo getAddressee() {
+        return addressee;
     }
 
-    public void setUser(UserInfo user) {
-        this.user = user;
+    public void setAddressee(UserInfo user) {
+        this.addressee = user;
     }
 
     public UserInfo getSender() {
@@ -116,13 +112,13 @@ public class CommonNotification extends AbstractEntity {
                 && Objects.equals(type, that.type)
                 && Objects.equals(status, that.status)
                 && Objects.equals(createdAt, that.createdAt)
-                && Objects.equals(user, that.user)
+                && Objects.equals(addressee, that.addressee)
                 && Objects.equals(sender, that.sender);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(message, type, status, createdAt, user, sender);
+        return Objects.hash(message, type, status, createdAt, addressee, sender);
     }
 
     @Override
@@ -132,7 +128,7 @@ public class CommonNotification extends AbstractEntity {
                 .add("type='" + type + "'")
                 .add("status='" + status + "'")
                 .add("localDateTime=" + createdAt)
-                .add("user=" + user.getId())
+                .add("user=" + addressee.getId())
                 .add("user=" + sender.getId())
                 .add("archivedAt=" + archivedAt)
                 .add("id='" + getId() + "'")
@@ -142,41 +138,12 @@ public class CommonNotification extends AbstractEntity {
     }
 
     public static CommonBuilder newNotification() {
-        return new CommonNotification().new CommonBuilder();
+        return new CommonBuilder();
     }
 
-    public class CommonBuilder extends AbstractBuilder<CommonBuilder, CommonNotification> {
+    public static class CommonBuilder {
 
-        protected String message;
-
-        protected CommonBuilder() {
-        }
-
-        @Override
-        protected CommonNotification createEmpty() {
-            return new CommonNotification();
-        }
-
-        @Override
-        public CommonNotification build() {
-            final CommonNotification notification = super.build();
-            notification.setType(NotificationType.COMMON);
-            return notification;
-        }
-
-    }
-
-    /**
-     * Абстрактный билдер.
-     *
-     * @param <T>
-     *            тип билдера
-     * @param <N>
-     *            тип уведомления
-     */
-    protected abstract class AbstractBuilder<T extends AbstractBuilder, N extends CommonNotification> {
-
-        UserInfo user;
+        UserInfo addressee;
 
         UserInfo sender;
 
@@ -184,46 +151,49 @@ public class CommonNotification extends AbstractEntity {
 
         String message;
 
-        protected AbstractBuilder() {
+        NotificationType notificationType;
+
+        protected CommonBuilder() {
         }
 
-        protected T self() {
-            return (T) this;
+        public CommonBuilder withAddressee(UserInfo user) {
+            this.addressee = user;
+            return this;
         }
 
-        protected abstract N createEmpty();
-
-        public T withUser(UserInfo user) {
-            this.user = user;
-            return self();
-        }
-
-        public T withSender(UserInfo sender) {
+        public CommonBuilder withSender(UserInfo sender) {
             this.sender = sender;
-            return self();
+            return this;
         }
 
-        public T withCreatedAt(LocalDateTime createdAt) {
+        public CommonBuilder withCreatedAt(LocalDateTime createdAt) {
             this.createdAt = createdAt;
-            return self();
+            return this;
         }
 
-        public T withMessage(String message) {
+        public CommonBuilder withMessage(String message) {
             this.message = message;
-            return self();
+            return this;
         }
 
-        public N build() {
-            final N notification = createEmpty();
+        public CommonBuilder withType(NotificationType notificationType) {
+            this.notificationType = notificationType;
+            return this;
+        }
+
+        public CommonNotification build() {
+            final CommonNotification notification = new CommonNotification();
             notification.setId(UUID.randomUUID().toString());
             notification.setNew(true);
-            notification.setUser(this.user);
+            notification.setType(Objects.requireNonNull(notificationType));
+            notification.setAddressee(Objects.requireNonNull(this.addressee));
             notification.setSender(this.sender);
-            if (notification.getCreatedAt() == null) {
-                notification.setCreatedAt(LocalDateTime.now());
-            }
+            notification.setStatus(NotificationStatus.CREATED);
             notification.setMessage(this.message);
+            notification.setCreatedAt(Objects.requireNonNullElseGet(this.createdAt, LocalDateTime::now));
             return notification;
         }
+
     }
+
 }

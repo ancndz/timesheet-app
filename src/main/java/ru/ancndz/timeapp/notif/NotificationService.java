@@ -1,9 +1,10 @@
 package ru.ancndz.timeapp.notif;
 
-import ru.ancndz.timeapp.coop.domain.CoopNotification;
-import ru.ancndz.timeapp.coop.domain.CooperateInfo;
+import ru.ancndz.timeapp.core.StoreContext;
 import ru.ancndz.timeapp.notif.domain.CommonNotification;
+import ru.ancndz.timeapp.notif.domain.NotificationType;
 import ru.ancndz.timeapp.user.domain.User;
+import ru.ancndz.timeapp.user.domain.UserInfo;
 
 import java.util.List;
 
@@ -51,19 +52,39 @@ public interface NotificationService {
     boolean hasActiveNotifications(User addressee);
 
     /**
-     * Принять сотрудничество.
+     * Поиск типа уведомления по системному имени.
      *
-     * @param notificationId
-     *            айди уведомления
+     * @param systemName
+     *            системное имя типа уведомления
+     * @return тип уведомления
      */
-    void acceptCooperation(String notificationId);
+    NotificationType findNotificationTypeBySystemName(String systemName);
 
     /**
-     * Получение уведомлений о сотрудничестве.
+     * Создание уведомления.
      *
-     * @param cooperateInfo
-     *            информация о сотрудничестве
-     * @return список уведомлений
+     * @param sender
+     *            отправитель
+     * @param addressee
+     *            получатель
+     * @param type
+     *            тип уведомления
+     * @param storeContext
+     *            контекст хранения
      */
-    List<CoopNotification> obtainCoopNotification(CooperateInfo cooperateInfo);
+    void createNotification(UserInfo sender, UserInfo addressee, String type, StoreContext storeContext);
+
+    /**
+     * Создание уведомления.
+     *
+     * @param sender
+     *            отправитель
+     * @param addressee
+     *            получатель
+     * @param type
+     *            тип уведомления
+     * @param storeContext
+     *            контекст хранения
+     */
+    void createNotification(UserInfo sender, UserInfo addressee, NotificationType type, StoreContext storeContext);
 }
