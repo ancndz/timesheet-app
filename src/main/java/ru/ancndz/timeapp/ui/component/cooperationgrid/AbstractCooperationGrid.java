@@ -13,6 +13,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.function.ValueProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ancndz.timeapp.coop.CooperateInfoService;
@@ -47,7 +48,8 @@ public abstract class AbstractCooperationGrid extends Grid<CooperateInfo> {
         setColumnRendering(ColumnRendering.LAZY);
         addClassName("cooperation-grid");
 
-        addColumn(createUserInfoRenderer()).setKey(USER_NAME_COLUMN_KEY)
+        addColumn(createUserInfoRenderer(info -> info.getClient().getName(), info -> info.getClient().getEmail()))
+                .setKey(USER_NAME_COLUMN_KEY)
                 .setHeader(getTranslation("app.field.coop.client"))
                 .setTooltipGenerator(info -> info.getClient().getName())
                 .setAutoWidth(true)
@@ -65,6 +67,26 @@ public abstract class AbstractCooperationGrid extends Grid<CooperateInfo> {
             }
             return null;
         });
+    }
+
+    /**
+     * Создание рендерера информации о пользователе.
+     *
+     * @return рендерер
+     */
+    public static <T> Renderer<T> createUserInfoRenderer(ValueProvider<T, String> nameProvider,
+            ValueProvider<T, String> emailProvider) {
+        return LitRenderer.<T>of("<vaadin-horizontal-layout style=\"align-items: center;\" theme=\"spacing\">"
+                + "<vaadin-avatar name=\"${item.fullName}\" alt=\"User avatar\"></vaadin-avatar>"
+                + "  <vaadin-vertical-layout style=\"line-height: var(--lumo-line-height-m);\">"
+                + "    <span> ${item.fullName} </span>"
+                + "    <span style=\"font-size: var(--lumo-font-size-s); color: var(--lumo-secondary-text-color);\">"
+                + "      ${item.email}"
+                + "    </span>"
+                + "  </vaadin-vertical-layout>"
+                + "</vaadin-horizontal-layout>")
+                .withProperty("fullName", nameProvider)
+                .withProperty("email", emailProvider);
     }
 
     /**
@@ -135,26 +157,6 @@ public abstract class AbstractCooperationGrid extends Grid<CooperateInfo> {
                 Notification.show(String.join(", ", e.getErrors()), 3000, Notification.Position.BOTTOM_CENTER);
             }
         }).closingParentDialog().build();
-    }
-
-    /**
-     * Создание рендерера информации о пользователе.
-     *
-     * @return рендерер
-     */
-    private Renderer<CooperateInfo> createUserInfoRenderer() {
-        return LitRenderer
-                .<CooperateInfo>of("<vaadin-horizontal-layout style=\"align-items: center;\" theme=\"spacing\">"
-                        + "<vaadin-avatar name=\"${item.fullName}\" alt=\"User avatar\"></vaadin-avatar>"
-                        + "  <vaadin-vertical-layout style=\"line-height: var(--lumo-line-height-m);\">"
-                        + "    <span> ${item.fullName} </span>"
-                        + "    <span style=\"font-size: var(--lumo-font-size-s); color: var(--lumo-secondary-text-color);\">"
-                        + "      ${item.email}"
-                        + "    </span>"
-                        + "  </vaadin-vertical-layout>"
-                        + "</vaadin-horizontal-layout>")
-                .withProperty("fullName", cooperateInfo -> cooperateInfo.getClient().getName())
-                .withProperty("email", cooperateInfo -> cooperateInfo.getClient().getEmail());
     }
 
 }

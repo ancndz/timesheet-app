@@ -1,5 +1,6 @@
 package ru.ancndz.timeapp.core.domain;
 
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
@@ -14,6 +15,7 @@ import jakarta.persistence.Transient;
 public class AbstractEntity implements DomainEntity<String> {
 
     @Id
+    @Nonnull
     private String id;
 
     @Transient
@@ -26,6 +28,7 @@ public class AbstractEntity implements DomainEntity<String> {
     }
 
     @Override
+    @Nonnull
     public String getId() {
         return id;
     }

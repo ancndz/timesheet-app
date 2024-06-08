@@ -185,7 +185,7 @@ public class CommonNotification extends AbstractEntity {
             final CommonNotification notification = new CommonNotification();
             notification.setId(UUID.randomUUID().toString());
             notification.setNew(true);
-            notification.setType(Objects.requireNonNull(notificationType));
+            notification.setType(Objects.requireNonNull(this.notificationType));
             notification.setAddressee(Objects.requireNonNull(this.addressee));
             notification.setSender(this.sender);
             notification.setStatus(NotificationStatus.CREATED);

@@ -1,11 +1,13 @@
 package ru.ancndz.timeapp.user;
 
 import jakarta.annotation.Nonnull;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import ru.ancndz.timeapp.user.domain.User;
 import ru.ancndz.timeapp.user.domain.UserInfo;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Сервис пользователей.
@@ -24,6 +26,13 @@ public interface UserService extends UserDetailsService {
      */
     @Nonnull
     User findUserById(String id);
+
+    List<User> findAll();
+
+    Stream<User> findAll(int limit, int offset);
+    Stream<User> findAll(PageRequest of);
+
+    long countAll();
 
     /**
      * Поиск пользователя по значению.

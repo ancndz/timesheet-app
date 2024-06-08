@@ -13,6 +13,7 @@ import ru.ancndz.timeapp.user.domain.User;
 import ru.ancndz.timeapp.user.domain.UserInfo;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Реализация сервиса уведомлений.
@@ -70,7 +71,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public NotificationType findNotificationTypeBySystemName(String systemName) {
-        return notificationTypeRepository.findBySystemName(systemName);
+        return Objects.requireNonNull(notificationTypeRepository.findBySystemName(systemName));
     }
 
     @Override
@@ -78,7 +79,7 @@ public class NotificationServiceImpl implements NotificationService {
             final UserInfo addressee,
             final String type,
             final StoreContext storeContext) {
-        final NotificationType notificationType = notificationTypeRepository.findBySystemName(type);
+        final NotificationType notificationType = findNotificationTypeBySystemName(type);
         createNotification(sender, addressee, notificationType, storeContext);
     }
 

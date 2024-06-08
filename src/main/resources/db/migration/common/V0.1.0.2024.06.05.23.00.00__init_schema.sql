@@ -54,16 +54,12 @@ create table timetable_user_info
 
 create table timetable_users
 (
-    id       varchar(255) not null,
-    password varchar(255) not null,
-    username varchar(255),
+    id                 varchar(255)  not null,
+    password           varchar(255)  not null,
+    username           varchar(255),
+    authorities        varchar(2550) not null,
+    account_non_locked boolean       not null default true,
     primary key (id)
-);
-
-create table user_authorities
-(
-    user_id     varchar(255) not null,
-    authorities bytea
 );
 
 alter table if exists timetable_cooperate_info
@@ -88,6 +84,3 @@ alter table if exists timetable_schedule
 
 alter table if exists timetable_schedule
     add constraint timetable_schedule_worker_fkey foreign key (worker_id) references timetable_user_info;
-
-alter table if exists user_authorities
-    add constraint timetable_schedule_user_fkey foreign key (user_id) references timetable_users;

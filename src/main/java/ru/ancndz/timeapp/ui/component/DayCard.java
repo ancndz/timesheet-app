@@ -111,6 +111,7 @@ public class DayCard extends Composite<VerticalLayout> {
      *            таблица
      */
     private void createNameColumn(final Grid<TimesheetEntry> scheduleEntries) {
+        // todo: получение имени работника при данных для клиента
         scheduleEntries
                 .addColumn(scheduleEntry -> MessageFormat.format("{0}: {1}",
                         scheduleEntry.getEntryTime().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)),

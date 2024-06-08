@@ -11,6 +11,7 @@ import ru.ancndz.timeapp.core.StoreService;
 import ru.ancndz.timeapp.security.ValidationException;
 import ru.ancndz.timeapp.user.domain.QUser;
 import ru.ancndz.timeapp.user.domain.User;
+import ru.ancndz.timeapp.user.domain.UserInfo;
 import ru.ancndz.timeapp.user.domain.repo.UserRepository;
 
 /**
@@ -40,7 +41,8 @@ public class ValidationTest extends AbstractTest {
     }
 
     private void createUser(final String test1) {
-        final User user = User.newUser().withUsername(test1).withPassword("test").build();
+        final UserInfo userInfo = UserInfo.newUserInfo().withName("test").build();
+        final User user = User.newUser().withUserInfo(userInfo).withUsername(test1).withPassword("test").build();
         doInTransaction(false, () -> storeService.store(new StoreContext(user)));
     }
 

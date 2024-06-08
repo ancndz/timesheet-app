@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.GrantedAuthority;
-import ru.ancndz.timeapp.security.AuthorizationService;
+import ru.ancndz.timeapp.security.UserRoleService;
 import ru.ancndz.timeapp.ui.IconViewContainer;
 import ru.ancndz.timeapp.ui.view.MainLayout;
 import ru.ancndz.timeapp.ui.view.RegisterView;
@@ -113,7 +113,7 @@ public class SideLinkNav extends Composite<SideNav> {
             for (var role : annotation.value()) {
                 if (userRoles.stream()
                         .anyMatch(grantedAuthority -> grantedAuthority.getAuthority()
-                                .equals(AuthorizationService.ROLE_PREFIX + role))) {
+                                .equals(UserRoleService.ROLE_PREFIX + role))) {
                     return true;
                 }
             }

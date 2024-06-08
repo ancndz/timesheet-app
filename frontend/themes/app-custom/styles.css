@@ -9,6 +9,9 @@ vaadin-grid.cooperation-grid::part(non-active) {
     background-color: var(--lumo-warning-color-10pct);
 }
 vaadin-grid.cooperation-grid::part(archived) {
+    background-color: var(--lumo-contrast-30pct);
+}
+vaadin-grid.users-grid::part(blocked-user) {
     background-color: var(--lumo-error-color-10pct);
 }
 vaadin-grid.day-card-grid::part(past) {

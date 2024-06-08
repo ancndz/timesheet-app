@@ -1,23 +1,27 @@
 package ru.ancndz.timeapp.user.impl;
 
 import jakarta.annotation.Nonnull;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ancndz.timeapp.core.StoreContext;
 import ru.ancndz.timeapp.core.StoreService;
+import ru.ancndz.timeapp.user.UserService;
 import ru.ancndz.timeapp.user.domain.QUser;
 import ru.ancndz.timeapp.user.domain.QUserInfo;
 import ru.ancndz.timeapp.user.domain.User;
 import ru.ancndz.timeapp.user.domain.UserInfo;
 import ru.ancndz.timeapp.user.domain.repo.UserInfoRepository;
 import ru.ancndz.timeapp.user.domain.repo.UserRepository;
-import ru.ancndz.timeapp.user.UserService;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -48,6 +52,28 @@ public class UserServiceImpl implements UserService {
     @Nonnull
     public User findUserById(final String id) {
         return userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public Stream<User> findAll(int limit, int offset) {
+        return userRepository.findAll(Pageable.ofSize(limit).withPage(offset / limit))
+                .stream();
+    }
+
+    @Override
+    public Stream<User> findAll(PageRequest of) {
+        return userRepository.findAll(of).stream();
+    }
+
+    @Override
+    public long countAll() {
+        return userRepository.count();
     }
 
     @Override

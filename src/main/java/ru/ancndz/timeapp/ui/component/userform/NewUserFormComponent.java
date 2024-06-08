@@ -5,11 +5,11 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.PasswordField;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.ancndz.timeapp.security.AuthorizationService;
+import ru.ancndz.timeapp.security.UserRoleService;
 import ru.ancndz.timeapp.security.ValidationException;
 import ru.ancndz.timeapp.ui.view.AppInfoView;
 import ru.ancndz.timeapp.user.UserService;
-import ru.ancndz.timeapp.user.domain.Role;
+import ru.ancndz.timeapp.security.Role;
 import ru.ancndz.timeapp.user.domain.User;
 import ru.ancndz.timeapp.user.domain.UserInfo;
 
@@ -23,7 +23,7 @@ import java.time.LocalDate;
  */
 public class NewUserFormComponent extends AbstractUserFormComponent {
 
-    public NewUserFormComponent(final AuthorizationService authorizationService,
+    public NewUserFormComponent(final UserRoleService userRoleService,
             final PasswordEncoder passwordEncoder,
             final UserService userService) {
         super(userService);
@@ -55,9 +55,9 @@ public class NewUserFormComponent extends AbstractUserFormComponent {
             if (userInfoBinder.writeBeanIfValid(userInfoBinder.getBean())
                     && userBinder.writeBeanIfValid(userBinder.getBean())) {
                 try {
-                    userBinder.getBean().addRole(authorizationService.getAuthority(Role.USER));
+                    userBinder.getBean().addRole(UserRoleService.ROLE_GRANTED_AUTHORITY_MAP.get(Role.USER));
                     if (iAmWorker.getValue()) {
-                        userBinder.getBean().addRole(authorizationService.getAuthority(Role.WORKER));
+                        userBinder.getBean().addRole(UserRoleService.ROLE_GRANTED_AUTHORITY_MAP.get(Role.WORKER));
                     }
                     userService.saveUser(userBinder.getBean());
                     event.getSource().getUI().ifPresent(ui -> ui.navigate(AppInfoView.class));

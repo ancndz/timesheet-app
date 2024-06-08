@@ -20,7 +20,7 @@ import ru.ancndz.timeapp.ui.IconViewContainer;
 import ru.ancndz.timeapp.ui.component.cooperationgrid.AbstractCooperationGrid;
 import ru.ancndz.timeapp.ui.component.cooperationgrid.CooperationGridFactory;
 import ru.ancndz.timeapp.user.UserService;
-import ru.ancndz.timeapp.user.domain.Role;
+import ru.ancndz.timeapp.security.Role;
 import ru.ancndz.timeapp.user.domain.User;
 
 /**

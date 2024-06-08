@@ -2,10 +2,8 @@ package ru.ancndz.timeapp.user.domain;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
@@ -14,9 +12,11 @@ import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.ancndz.timeapp.core.domain.AbstractEntity;
+import ru.ancndz.timeapp.user.SetToStringConverter;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -38,13 +38,16 @@ public class User extends AbstractEntity implements UserDetails, CredentialsCont
     @Column(nullable = false)
     private String password;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
+    @Column
+    @Convert(converter = SetToStringConverter.class)
     private Set<GrantedAuthority> authorities;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @PrimaryKeyJoinColumn
     private UserInfo userInfo;
+
+    @Column
+    private Boolean accountNonLocked = true;
 
     public User() {
     }
@@ -54,12 +57,16 @@ public class User extends AbstractEntity implements UserDetails, CredentialsCont
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Set<GrantedAuthority> getAuthorities() {
         return authorities;
     }
 
     public void addRole(final GrantedAuthority role) {
         authorities.add(role);
+    }
+
+    public void revokeRole(final GrantedAuthority role) {
+        authorities.remove(role);
     }
 
     @Override
@@ -79,7 +86,11 @@ public class User extends AbstractEntity implements UserDetails, CredentialsCont
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return accountNonLocked;
+    }
+
+    public void setAccountNonLocked(boolean accountNonLocked) {
+        this.accountNonLocked = accountNonLocked;
     }
 
     @Override
@@ -100,8 +111,8 @@ public class User extends AbstractEntity implements UserDetails, CredentialsCont
         this.username = email;
     }
 
-    public void setAuthorities(Set<GrantedAuthority> authorities) {
-        this.authorities = authorities;
+    public void setAuthorities(Collection<GrantedAuthority> authorities) {
+        this.authorities = Set.copyOf(authorities);
     }
 
     public UserInfo getUserInfo() {
@@ -173,6 +184,11 @@ public class User extends AbstractEntity implements UserDetails, CredentialsCont
 
         public Builder withAuthorities(Set<GrantedAuthority> authorities) {
             this.authorities = authorities;
+            return this;
+        }
+
+        public Builder withAuthorities(GrantedAuthority... authorities) {
+            this.authorities.addAll(List.of(authorities));
             return this;
         }
 

@@ -25,11 +25,13 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.ancndz.timeapp.coop.CooperateInfoService;
 import ru.ancndz.timeapp.coop.domain.CooperateInfo;
-import ru.ancndz.timeapp.security.AuthorizationService;
+import ru.ancndz.timeapp.security.Role;
+import ru.ancndz.timeapp.security.UserRoleService;
 import ru.ancndz.timeapp.timesheet.TimesheetService;
 import ru.ancndz.timeapp.timesheet.WeekUtils;
 import ru.ancndz.timeapp.timesheet.domain.TimesheetEntry;
@@ -56,7 +58,7 @@ import java.util.Optional;
 @SpringComponent
 @RouteScope
 @Route(value = WeekView.LAYOUT_ROUTE, layout = MainLayout.class)
-@PermitAll
+@RolesAllowed(Role.USER)
 public class WeekView extends Composite<VerticalLayout> implements IconViewContainer, HasDynamicTitle {
 
     private static final Logger log = LoggerFactory.getLogger(WeekView.class);
@@ -71,7 +73,7 @@ public class WeekView extends Composite<VerticalLayout> implements IconViewConta
 
     private final CooperateInfoService cooperateInfoService;
 
-    private final AuthorizationService authorizationService;
+    private final UserRoleService userRoleService;
 
     private final transient AuthenticationContext authenticationContext;
 
@@ -88,18 +90,18 @@ public class WeekView extends Composite<VerticalLayout> implements IconViewConta
      *            сервис расписания
      * @param cooperateInfoService
      *            сервис сотрудничества
-     * @param authorizationService
+     * @param userRoleService
      *            сервис авторизации
      * @param authenticationContext
      *            контекст аутентификации
      */
     public WeekView(final TimesheetService timesheetService,
             final CooperateInfoService cooperateInfoService,
-            final AuthorizationService authorizationService,
+            final UserRoleService userRoleService,
             final AuthenticationContext authenticationContext) {
         this.timesheetService = timesheetService;
         this.cooperateInfoService = cooperateInfoService;
-        this.authorizationService = authorizationService;
+        this.userRoleService = userRoleService;
         this.authenticationContext = authenticationContext;
         this.dayCardLayoutMap = new HashMap<>();
         this.currentStart = WeekUtils.getWeekStartDate(LocalDate.now());
@@ -206,7 +208,7 @@ public class WeekView extends Composite<VerticalLayout> implements IconViewConta
             final VerticalLayout addingForm,
             final Optional<User> currentUserDetails) {
         final Tabs tabs = new Tabs();
-        if (currentUserDetails.map(authorizationService::isWorker).orElse(false)) {
+        if (currentUserDetails.map(user -> userRoleService.hasRole(user, Role.WORKER)).orElse(false)) {
             final Tab workerTab = new Tab(getTranslation("app.tab.worker"));
             workerTab.setId(WORKER_TAB_ID);
             tabs.add(workerTab);
