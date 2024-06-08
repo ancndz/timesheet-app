@@ -54,9 +54,7 @@ public class DefaultCooperationGrid extends AbstractCooperationGrid {
                 () -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
                 .setHeader(getTranslation("app.field.coop.coop-date"))
                 .setAutoWidth(true)
-                .setFlexGrow(0)
-                .setSortable(true)
-                .setComparator(Comparator.comparing(CooperateInfo::getCoopDate));
+                .setFlexGrow(0);
 
         final Grid.Column<CooperateInfo> infoColumn = addColumn(CooperateInfo::getInfo).setKey("infoColumn")
                 .setHeader(getTranslation("app.field.coop.info"))

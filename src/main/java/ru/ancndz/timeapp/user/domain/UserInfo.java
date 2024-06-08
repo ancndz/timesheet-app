@@ -146,7 +146,7 @@ public class UserInfo extends AbstractEntity {
             userInfo.setName(name);
             userInfo.setEmail(email);
             userInfo.setPhoneNumber(phoneNumber);
-            userInfo.setRegDate(regDate);
+            userInfo.setRegDate(this.regDate == null ? LocalDate.now() : this.regDate);
             return userInfo;
         }
     }

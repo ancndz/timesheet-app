@@ -24,7 +24,7 @@ public interface CommonNotificationRepository
      *            айди пользователя
      * @return список уведомлений
      */
-    List<CommonNotification> findAllByUserIdAndArchivedAtIsNullOrderByCreatedAtDesc(String userId);
+    List<CommonNotification> findAllByAddresseeIdAndArchivedAtIsNullOrderByCreatedAtDesc(String userId);
 
     /**
      * Поиск всех уведомлений по айди отправителя.
@@ -42,6 +42,6 @@ public interface CommonNotificationRepository
      *            айди пользователя
      * @return наличие уведомлений
      */
-    boolean existsByUserIdAndArchivedAtIsNull(String id);
+    boolean existsByAddresseeIdAndArchivedAtIsNull(String id);
 
 }

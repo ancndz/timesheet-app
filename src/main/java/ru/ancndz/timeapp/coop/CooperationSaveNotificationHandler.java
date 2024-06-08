@@ -1,16 +1,13 @@
 package ru.ancndz.timeapp.coop;
 
-import org.springframework.context.MessageSource;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import ru.ancndz.timeapp.coop.domain.CoopNotification;
 import ru.ancndz.timeapp.coop.domain.CooperateInfo;
 import ru.ancndz.timeapp.core.BeforeStoreEvent;
 import ru.ancndz.timeapp.core.StoreContext;
 import ru.ancndz.timeapp.notif.NotificationService;
-import ru.ancndz.timeapp.notif.domain.CommonNotification;
-
-import java.util.Locale;
+import ru.ancndz.timeapp.notif.domain.NotificationType;
+import ru.ancndz.timeapp.notif.domain.NotificationTypeSystemName;
 
 /**
  * Обработчик сохранения информации о сотрудничестве.
@@ -23,12 +20,8 @@ public class CooperationSaveNotificationHandler {
 
     private final NotificationService notificationService;
 
-    private final MessageSource messageSource;
-
-    public CooperationSaveNotificationHandler(final NotificationService notificationService,
-            final MessageSource messageSource) {
+    public CooperationSaveNotificationHandler(final NotificationService notificationService) {
         this.notificationService = notificationService;
-        this.messageSource = messageSource;
     }
 
     /**
@@ -56,60 +49,23 @@ public class CooperationSaveNotificationHandler {
                 .filter(cooperateInfo -> cooperateInfo.getArchivedAt() != null && cooperateInfo.isActive())
                 .toList();
 
+        final NotificationType newCoopNotificationType =
+                notificationService.findNotificationTypeBySystemName(NotificationTypeSystemName.NEW_COOP);
         newCoops.forEach(cooperateInfo -> {
-            final String message =
-                    messageSource.getMessage("app.notification.type.new-coop", null, Locale.getDefault());
-            final CoopNotification coopNotification = CoopNotification.newCoopNotification()
-                    .withUser(cooperateInfo.getClient())
-                    .withSender(cooperateInfo.getWorker())
-                    .withMessage(message)
-                    .withCooperateInfo(cooperateInfo)
-                    .build();
-            storeContext.add(coopNotification);
+            notificationService.createNotification(cooperateInfo.getWorker(),
+                    cooperateInfo.getClient(),
+                    newCoopNotificationType,
+                    storeContext);
         });
 
+        final NotificationType deletedCoopNotificationType =
+                notificationService.findNotificationTypeBySystemName(NotificationTypeSystemName.COOP_DELETED);
         deletedCoops.forEach(cooperateInfo -> {
-            final String message =
-                    messageSource.getMessage("app.notification.type.coop-deleted", null, Locale.getDefault());
-            final CommonNotification coopNotification = CommonNotification.newNotification()
-                    .withUser(cooperateInfo.getClient())
-                    .withSender(cooperateInfo.getWorker())
-                    .withMessage(message)
-                    .build();
-            storeContext.add(coopNotification);
+            notificationService.createNotification(cooperateInfo.getWorker(),
+                    cooperateInfo.getClient(),
+                    deletedCoopNotificationType,
+                    storeContext);
         });
     }
 
-    /**
-     * Обработка удаления информации о сотрудничестве.
-     *
-     * @param event
-     *            событие сохранения
-     */
-    @EventListener(BeforeStoreEvent.class)
-    public void onCooperationDelete(final BeforeStoreEvent event) {
-        final StoreContext storeContext = event.getStoreContext();
-
-        final var deletedCoops = storeContext.getObjects()
-                .stream()
-                .filter(CooperateInfo.class::isInstance)
-                .map(CooperateInfo.class::cast)
-                .filter(cooperateInfo -> cooperateInfo.getArchivedAt() != null)
-                .toList();
-
-        deletedCoops.forEach(cooperateInfo -> {
-            final String message =
-                    messageSource.getMessage("app.notification.type.coop-deleted", null, Locale.getDefault());
-            final CommonNotification commonNotification = CommonNotification.newNotification()
-                    .withUser(cooperateInfo.getClient())
-                    .withSender(cooperateInfo.getWorker())
-                    .withMessage(message)
-                    .build();
-            notificationService.obtainCoopNotification(cooperateInfo).forEach(coopNotificationToDelete -> {
-                coopNotificationToDelete.setDeleted(true);
-                storeContext.add(coopNotificationToDelete);
-            });
-            storeContext.add(commonNotification);
-        });
-    }
 }

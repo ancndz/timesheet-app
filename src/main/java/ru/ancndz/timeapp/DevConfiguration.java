@@ -9,15 +9,19 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.ancndz.timeapp.coop.domain.CooperateInfo;
 import ru.ancndz.timeapp.core.StoreContext;
 import ru.ancndz.timeapp.core.StoreService;
 import ru.ancndz.timeapp.notif.domain.CommonNotification;
-import ru.ancndz.timeapp.security.AuthorizationService;
+import ru.ancndz.timeapp.notif.domain.NotificationType;
+import ru.ancndz.timeapp.notif.domain.NotificationTypeSystemName;
+import ru.ancndz.timeapp.notif.domain.repo.NotificationTypeRepository;
+import ru.ancndz.timeapp.security.Role;
+import ru.ancndz.timeapp.security.UserRoleService;
 import ru.ancndz.timeapp.timesheet.WeekUtils;
 import ru.ancndz.timeapp.timesheet.domain.TimesheetEntry;
-import ru.ancndz.timeapp.user.domain.Role;
 import ru.ancndz.timeapp.user.domain.User;
 import ru.ancndz.timeapp.user.domain.UserInfo;
 import ru.ancndz.timeapp.user.domain.repo.UserRepository;
@@ -80,16 +84,15 @@ public class DevConfiguration {
      *            сервис хранилища
      * @param passwordEncoder
      *            кодировщик паролей
-     * @param authorizationService
-     *            сервис авторизации
      * @param userRepository
      *            репозиторий пользователей
      * @return командная строка
      */
     @Bean
+    @Order(2)
     public CommandLineRunner dataLoader(final StoreService storeService,
             final PasswordEncoder passwordEncoder,
-            final AuthorizationService authorizationService,
+            final NotificationTypeRepository notificationTypeRepository,
             final UserRepository userRepository) {
         return args -> {
             if (userRepository.count() > 2) {
@@ -101,24 +104,25 @@ public class DevConfiguration {
             final String defaultPassword = passwordEncoder.encode("1");
 
             final User admin1 = User.newUser()
-                    .withUsername("testAdmin")
+                    .withUsername("admin")
                     .withPassword(defaultPassword)
-                    .withAuthorities(authorizationService.getAuthorities(Role.USER, Role.WORKER, Role.ADMIN))
-                    .withUserInfo(UserInfo.newUserInfo().withName("testAdmin").build())
+                    .withAuthorities(UserRoleService.ROLE_GRANTED_AUTHORITY_MAP.get(Role.ADMIN))
+                    .withUserInfo(UserInfo.newUserInfo().withName("testAdmin").withEmail("admin@admin.com").build())
                     .build();
             storeContext.add(admin1);
             final User admin2 = User.newUser()
-                    .withUsername("testAdmin2")
+                    .withUsername("admin2")
                     .withPassword(defaultPassword)
-                    .withAuthorities(authorizationService.getAuthorities(Role.USER, Role.WORKER, Role.ADMIN))
-                    .withUserInfo(UserInfo.newUserInfo().withName("testAdmin2").build())
+                    .withAuthorities(UserRoleService.ROLE_GRANTED_AUTHORITY_MAP.get(Role.ADMIN))
+                    .withUserInfo(UserInfo.newUserInfo().withName("testAdmin2").withEmail("admin2@admin.com").build())
                     .build();
             storeContext.add(admin2);
 
             final User worker = User.newUser()
                     .withUsername("worker")
                     .withPassword(defaultPassword)
-                    .withAuthorities(authorizationService.getAuthorities(Role.USER, Role.WORKER))
+                    .withAuthorities(UserRoleService.ROLE_GRANTED_AUTHORITY_MAP.get(Role.WORKER),
+                            UserRoleService.ROLE_GRANTED_AUTHORITY_MAP.get(Role.USER))
                     .withUserInfo(UserInfo.newUserInfo()
                             .withName("workerName")
                             .withPhoneNumber("+79999999999")
@@ -127,36 +131,38 @@ public class DevConfiguration {
                     .build();
             storeContext.add(worker);
 
-            createUsers(worker, defaultPassword, storeContext, authorizationService);
+            createUsers(worker, defaultPassword, storeContext);
 
-            createNotifications(admin1, worker, storeContext);
+            createNotifications(admin1, worker, notificationTypeRepository, storeContext);
 
             storeService.store(storeContext);
         };
     }
 
-    private void createNotifications(User admin1, User worker, StoreContext storeContext) {
+    private void createNotifications(User admin1,
+            User worker,
+            NotificationTypeRepository notificationTypeRepository,
+            StoreContext storeContext) {
+        final NotificationType commonType =
+                notificationTypeRepository.findBySystemName(NotificationTypeSystemName.COMMON);
         for (int i = 1; i <= 5; i++) {
             final CommonNotification notification = CommonNotification.newNotification()
-                    .withUser(worker.getUserInfo())
+                    .withType(commonType)
+                    .withAddressee(worker.getUserInfo())
                     .withSender(admin1.getUserInfo())
                     .withCreatedAt(LocalDate.now().atTime(10, 0))
                     .withMessage("Test message #" + i)
                     .build();
-
             storeContext.add(notification);
         }
     }
 
-    private void createUsers(User worker,
-            String defaultPassword,
-            StoreContext storeContext,
-            AuthorizationService authorizationService) {
+    private void createUsers(User worker, String defaultPassword, StoreContext storeContext) {
         for (int i = 1; i <= 20; i++) {
             final User user = User.newUser()
                     .withUsername("user" + i)
                     .withPassword(defaultPassword)
-                    .withAuthorities(authorizationService.getAuthorities(Role.USER))
+                    .withAuthorities(UserRoleService.ROLE_GRANTED_AUTHORITY_MAP.get(Role.USER))
                     .withUserInfo(UserInfo.newUserInfo()
                             .withName("userName" + i)
                             .withEmail("testEmail" + i + "@mail.mail")

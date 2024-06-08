@@ -83,6 +83,7 @@ public abstract class AbstractUserFormComponent extends VerticalLayout {
         userBinder = new Binder<>(User.class);
         userBinder.forField(nameField)
                 .asRequired()
+                .withValidator(name -> name.matches("[a-zA-Z0-9_!@#$%^&*()]+"), getTranslation("app.error.name-not-latin"))
                 .withValidator(name -> !userService.existsUserByName(getCurrentUser(), name),
                         getTranslation("app.error.name-exists"))
                 .bind(User::getUsername, User::setUsername);

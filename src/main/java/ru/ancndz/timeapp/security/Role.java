@@ -1,4 +1,4 @@
-package ru.ancndz.timeapp.user.domain;
+package ru.ancndz.timeapp.security;
 
 /**
  * Класс, содержащий роли пользователей.

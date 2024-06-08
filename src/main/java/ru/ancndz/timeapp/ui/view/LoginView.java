@@ -71,14 +71,13 @@ public class LoginView extends Composite<LoginOverlay> implements BeforeEnterObs
         i18nForm.setUsername(getTranslation("app.login-form.username"));
         i18nForm.setPassword(getTranslation("app.login-form.password"));
         i18nForm.setSubmit(getTranslation("app.login-form.submit"));
-        i18n.setForm(i18nForm);
 
         final LoginI18n.ErrorMessage i18nErrorMessage = i18n.getErrorMessage();
         i18nErrorMessage.setTitle(getTranslation("app.login-error.title"));
         i18nErrorMessage.setMessage(getTranslation("app.login-error.message"));
         i18nErrorMessage.setUsername(getTranslation("app.login-error.username"));
         i18nErrorMessage.setPassword(getTranslation("app.login-error.password"));
-        i18n.setErrorMessage(i18nErrorMessage);
+
         getContent().setI18n(i18n);
     }
 

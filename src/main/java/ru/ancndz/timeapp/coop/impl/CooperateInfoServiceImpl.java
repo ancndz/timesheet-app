@@ -7,6 +7,8 @@ import ru.ancndz.timeapp.coop.domain.CooperateInfo;
 import ru.ancndz.timeapp.coop.domain.repo.CooperateInfoRepository;
 import ru.ancndz.timeapp.core.StoreContext;
 import ru.ancndz.timeapp.core.StoreService;
+import ru.ancndz.timeapp.notif.NotificationService;
+import ru.ancndz.timeapp.notif.domain.NotificationTypeSystemName;
 import ru.ancndz.timeapp.user.domain.UserInfo;
 import ru.ancndz.timeapp.user.domain.repo.UserInfoRepository;
 
@@ -25,13 +27,17 @@ public class CooperateInfoServiceImpl implements CooperateInfoService {
 
     private final UserInfoRepository userInfoRepository;
 
+    private final NotificationService notificationService;
+
     private final StoreService storeService;
 
     public CooperateInfoServiceImpl(final CooperateInfoRepository cooperateInfoRepository,
             final UserInfoRepository userInfoRepository,
+            final NotificationService notificationService,
             final StoreService storeService) {
         this.cooperateInfoRepository = cooperateInfoRepository;
         this.userInfoRepository = userInfoRepository;
+        this.notificationService = notificationService;
         this.storeService = storeService;
     }
 
@@ -78,6 +84,21 @@ public class CooperateInfoServiceImpl implements CooperateInfoService {
     @Transactional
     public void save(CooperateInfo item) {
         storeService.store(new StoreContext(item));
+    }
+
+    @Override
+    public void acceptCooperation(UserInfo sender, UserInfo addressee) {
+        final CooperateInfo cooperateInfo =
+                cooperateInfoRepository.findByClientIdAndWorkerId(addressee.getId(), sender.getId());
+        if (cooperateInfo != null) {
+            StoreContext storeContext = new StoreContext(cooperateInfo);
+            cooperateInfo.setActive(true);
+
+            notificationService
+                    .createNotification(sender, addressee, NotificationTypeSystemName.COOP_ACCEPTED, storeContext);
+
+            storeService.store(storeContext);
+        }
     }
 
 }

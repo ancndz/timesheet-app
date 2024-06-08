@@ -12,7 +12,7 @@ import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.ancndz.timeapp.security.AuthorizationService;
+import ru.ancndz.timeapp.security.UserRoleService;
 import ru.ancndz.timeapp.ui.component.userform.NewUserFormComponent;
 import ru.ancndz.timeapp.user.UserService;
 
@@ -34,14 +34,14 @@ public class RegisterView extends Composite<VerticalLayout> implements HasDynami
 
     private final transient AuthenticationContext authenticationContext;
 
-    public RegisterView(final AuthorizationService authorizationService,
+    public RegisterView(final UserRoleService userRoleService,
             final AuthenticationContext authenticationContext,
             final PasswordEncoder passwordEncoder,
             final UserService userService) {
         this.authenticationContext = authenticationContext;
         getContent().setAlignItems(FlexComponent.Alignment.CENTER);
 
-        getContent().add(new NewUserFormComponent(authorizationService, passwordEncoder, userService));
+        getContent().add(new NewUserFormComponent(userRoleService, passwordEncoder, userService));
     }
 
     @Override

@@ -16,7 +16,7 @@ import jakarta.annotation.security.RolesAllowed;
 import ru.ancndz.timeapp.coop.CooperateInfoService;
 import ru.ancndz.timeapp.ui.view.CooperationView;
 import ru.ancndz.timeapp.ui.view.LoginView;
-import ru.ancndz.timeapp.user.domain.Role;
+import ru.ancndz.timeapp.security.Role;
 import ru.ancndz.timeapp.user.domain.User;
 
 import java.util.Optional;
