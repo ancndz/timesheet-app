@@ -39,37 +39,34 @@ public class TimesheetServiceImpl implements TimesheetService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<TimesheetEntry> getWorkerEntriesOfDay(final String workerId, final LocalDate date) {
+    public List<TimesheetEntry> getWorkerEntriesOfDays(final String workerId, final List<LocalDate> days) {
         final QTimesheetEntry qTimesheetEntry = QTimesheetEntry.timesheetEntry;
         return StreamSupport
                 .stream(timesheetEntryRepository
-                        .findAll(qTimesheetEntry.worker.id.eq(workerId).and(qTimesheetEntry.entryDate.eq(date)))
+                        .findAll(qTimesheetEntry.worker.id.eq(workerId).and(qTimesheetEntry.entryDate.in(days)))
                         .spliterator(), false)
-                .collect(Collectors.toList());
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TimesheetEntry> getClientEntriesOfDays(String clientId, List<LocalDate> days) {
+        final QTimesheetEntry qTimesheetEntry = QTimesheetEntry.timesheetEntry;
+        return StreamSupport.stream(timesheetEntryRepository.findAll(qTimesheetEntry.client.id.eq(clientId)
+                .and(qTimesheetEntry.entryDate.in(days))
+                .and(qTimesheetEntry.archivedAt.isNull())).spliterator(), false).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<TimesheetEntry> getWorkerEntriesOfWeek(final String workerId, final LocalDate date) {
-        final QTimesheetEntry QTimesheetEntry = ru.ancndz.timeapp.timesheet.domain.QTimesheetEntry.timesheetEntry;
-        final LocalDate startOfWeek = WeekUtils.getWeekStartDate(date);
-        return StreamSupport.stream(timesheetEntryRepository.findAll(QTimesheetEntry.worker.id.eq(workerId)
-                .and(QTimesheetEntry.entryDate.between(startOfWeek, startOfWeek.plusDays(6)))
-                .and(QTimesheetEntry.archivedAt.isNull())).spliterator(), false).collect(Collectors.toList());
+        return getWorkerEntriesOfDays(workerId, getDatesInWeek(date));
     }
 
     @Override
-    public WeekViewItem convertToViewItem(final LocalDate date, final List<TimesheetEntry> entries) {
-        final WeekViewItem weekViewItem = new WeekViewItem();
-
-        final LocalDate startDayOfWeek = WeekUtils.getWeekStartDate(date);
-        final var scheduleMap = entries.stream().collect(Collectors.groupingBy(TimesheetEntry::getEntryDate));
-
-        Stream.iterate(startDayOfWeek, dt -> dt.plusDays(1))
-                .limit(7)
-                .forEach(eachWeekDay -> weekViewItem.getMap()
-                        .put(eachWeekDay, scheduleMap.getOrDefault(eachWeekDay, Collections.emptyList())));
-        return weekViewItem;
+    @Transactional(readOnly = true)
+    public List<TimesheetEntry> getClientEntriesOfWeek(String clientId, LocalDate date) {
+        return getClientEntriesOfDays(clientId, getDatesInWeek(date));
     }
 
     @Override
@@ -85,22 +82,63 @@ public class TimesheetServiceImpl implements TimesheetService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<TimesheetEntry> getClientEntriesOfWeek(String clientId, LocalDate date) {
+    public List<TimesheetEntry> getAllClientEntries(String clientId) {
         final QTimesheetEntry qTimesheetEntry = QTimesheetEntry.timesheetEntry;
-        final LocalDate startOfWeek = WeekUtils.getWeekStartDate(date);
-        return StreamSupport.stream(timesheetEntryRepository.findAll(qTimesheetEntry.client.id.eq(clientId)
-                .and(qTimesheetEntry.entryDate.between(startOfWeek, startOfWeek.plusWeeks(1)))
-                .and(qTimesheetEntry.archivedAt.isNull())).spliterator(), false).collect(Collectors.toList());
+        return StreamSupport
+                .stream(timesheetEntryRepository.findAll(qTimesheetEntry.client.id.eq(clientId)).spliterator(), false)
+                .toList();
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<TimesheetEntry> getClientEntriesOfDay(String clientId, LocalDate selectedDayDate) {
+    public List<TimesheetEntry> getAllWorkerEntries(String workerId) {
         final QTimesheetEntry qTimesheetEntry = QTimesheetEntry.timesheetEntry;
-        return StreamSupport.stream(timesheetEntryRepository.findAll(qTimesheetEntry.client.id.eq(clientId)
-                .and(qTimesheetEntry.entryDate.eq(selectedDayDate))
-                .and(qTimesheetEntry.archivedAt.isNull())).spliterator(), false).collect(Collectors.toList());
+        return StreamSupport
+                .stream(timesheetEntryRepository.findAll(qTimesheetEntry.worker.id.eq(workerId)).spliterator(), false)
+                .toList();
+    }
+
+    @Override
+    public List<TimesheetEntry> getEntriesByClientAndWorker(String clientId, String workerId) {
+        final QTimesheetEntry qTimesheetEntry = QTimesheetEntry.timesheetEntry;
+        return StreamSupport
+                .stream(timesheetEntryRepository
+                        .findAll(qTimesheetEntry.client.id.eq(clientId).and(qTimesheetEntry.worker.id.eq(workerId)))
+                        .spliterator(), false)
+                .toList();
+    }
+
+    /**
+     * Получить даты в неделе.
+     *
+     * @param date
+     *            дата
+     * @return список дат
+     */
+    private List<LocalDate> getDatesInWeek(LocalDate date) {
+        final LocalDate startOfWeek = WeekUtils.getWeekStartDate(date);
+        return Stream.iterate(startOfWeek, dt -> dt.plusDays(1)).limit(7).toList();
+    }
+
+    /**
+     * Преобразовать записи в представление.
+     *
+     * @param date
+     *            дата
+     * @param entries
+     *            записи
+     * @return представление
+     */
+    private WeekViewItem convertToViewItem(final LocalDate date, final List<TimesheetEntry> entries) {
+        final WeekViewItem weekViewItem = new WeekViewItem();
+
+        final LocalDate startDayOfWeek = WeekUtils.getWeekStartDate(date);
+        final var scheduleMap = entries.stream().collect(Collectors.groupingBy(TimesheetEntry::getEntryDate));
+
+        Stream.iterate(startDayOfWeek, dt -> dt.plusDays(1))
+                .limit(7)
+                .forEach(eachWeekDay -> weekViewItem.getMap()
+                        .put(eachWeekDay, scheduleMap.getOrDefault(eachWeekDay, Collections.emptyList())));
+        return weekViewItem;
     }
 
     @Override

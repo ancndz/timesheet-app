@@ -1,4 +1,4 @@
-package ru.ancndz.timeapp.coop;
+package ru.ancndz.timeapp.coop.impl;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

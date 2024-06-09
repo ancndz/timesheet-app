@@ -24,7 +24,6 @@ import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +43,7 @@ import ru.ancndz.timeapp.user.domain.UserInfo;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -344,13 +344,13 @@ public class WeekView extends Composite<VerticalLayout> implements IconViewConta
         final LocalDate selectedDayDate = selectedDay.getDate();
         final List<TimesheetEntry> schedulesOfDay;
         if (workerTabSelected) {
-            schedulesOfDay = timesheetService.getWorkerEntriesOfDay(
+            schedulesOfDay = timesheetService.getWorkerEntriesOfDays(
                     authenticationContext.getAuthenticatedUser(User.class).get().getId(),
-                    selectedDayDate);
+                    Collections.singletonList(selectedDayDate));
         } else {
-            schedulesOfDay = timesheetService.getClientEntriesOfDay(
+            schedulesOfDay = timesheetService.getClientEntriesOfDays(
                     authenticationContext.getAuthenticatedUser(User.class).get().getId(),
-                    selectedDayDate);
+                    Collections.singletonList(selectedDayDate));
         }
         selectedDay.updateData(workerTabSelected, selectedDayDate, selectedDayDate, schedulesOfDay);
     }
@@ -372,10 +372,9 @@ public class WeekView extends Composite<VerticalLayout> implements IconViewConta
                     authenticationContext.getAuthenticatedUser(User.class).get().getId(),
                     actualPickedDate);
         }
-        schedulesOfWeek.getMap().forEach((date, scheduleEntries) -> {
-            dayCardLayoutMap.get(date.getDayOfWeek())
-                    .updateData(workerTabSelected, date, actualPickedDate, scheduleEntries);
-        });
+        schedulesOfWeek.getMap()
+                .forEach((date, scheduleEntries) -> dayCardLayoutMap.get(date.getDayOfWeek())
+                        .updateData(workerTabSelected, date, actualPickedDate, scheduleEntries));
     }
 
     /**

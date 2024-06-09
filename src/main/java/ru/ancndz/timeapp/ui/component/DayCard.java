@@ -246,7 +246,7 @@ public class DayCard extends Composite<VerticalLayout> {
         }
         this.cardDate = date;
         select(Objects.equals(actualDatePicked, date));
-        cardDateText.setText(date.format(DATE_FORMATTER));
+        cardDateText.setText(date.format(DATE_FORMATTER.withLocale(getLocale())));
         dayOfWeekNameText.setText(date.getDayOfWeek().getDisplayName(TextStyle.FULL, getLocale()));
 
         setId(date.getDayOfWeek().toString());

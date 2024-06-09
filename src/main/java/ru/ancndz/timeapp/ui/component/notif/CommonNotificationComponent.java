@@ -77,13 +77,14 @@ public class CommonNotificationComponent extends Div implements HasComponents, H
             } else {
                 messageText.setText(getTranslation(notification.getType().getMessage()));
             }
+            final String createdAdText = notification.getCreatedAt()
+                    .format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(getLocale()));
             if (notification.getSender() != null) {
                 infoText.setText(getTranslation("app.message.notification.subtext",
                         notification.getSender().getName(),
-                        notification.getCreatedAt().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))));
+                        createdAdText));
             } else {
-                infoText.setText(getTranslation("app.message.notification.subtext.short",
-                        notification.getCreatedAt().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))));
+                infoText.setText(getTranslation("app.message.notification.subtext.short", createdAdText));
 
             }
         }

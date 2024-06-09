@@ -12,7 +12,7 @@
 
     <groupId>ru.ancndz</groupId>
     <artifactId>timesheet-app</artifactId>
-    <version>0.1.0.3</version>
+    <version>0.1.1.0</version>
     <name>timesheet-app</name>
     <description>timesheet app</description>
     <packaging>jar</packaging>
