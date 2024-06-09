@@ -22,6 +22,8 @@ import java.time.LocalTime;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -157,12 +159,12 @@ class TimesheetServiceImplTest extends AbstractTest {
      */
     @Test
     void getSchedulesOfDay() {
-        final List<TimesheetEntry> scheduleEntries =
-                timesheetService.getWorkerEntriesOfDay(worker1Id, LocalDate.of(2024, Month.APRIL, 19));
+        final List<TimesheetEntry> scheduleEntries = timesheetService.getWorkerEntriesOfDays(worker1Id,
+                Collections.singletonList(LocalDate.of(2024, Month.APRIL, 19)));
         assertThat(scheduleEntries).hasSize(2);
 
-        final List<TimesheetEntry> emptyList =
-                timesheetService.getWorkerEntriesOfDay(worker2Id, LocalDate.of(2024, Month.APRIL, 19));
+        final List<TimesheetEntry> emptyList = timesheetService.getWorkerEntriesOfDays(worker2Id,
+                Collections.singletonList(LocalDate.of(2024, Month.APRIL, 19)));
         assertThat(emptyList).isEmpty();
     }
 
@@ -185,12 +187,9 @@ class TimesheetServiceImplTest extends AbstractTest {
      */
     @Test
     void convertToViewItem() {
-        final List<TimesheetEntry> scheduleEntries =
-                timesheetService.getWorkerEntriesOfWeek(worker1Id, LocalDate.of(2024, Month.APRIL, 19));
-        assertThat(scheduleEntries).hasSize(7);
-
         final WeekViewItem weekViewItem =
-                timesheetService.convertToViewItem(LocalDate.of(2024, Month.APRIL, 19), scheduleEntries);
+                timesheetService.getWorkerEntriesOfWeekAndConvert(worker1Id, LocalDate.of(2024, Month.APRIL, 19));
+        assertThat(weekViewItem.getMap().values().stream().flatMap(Collection::stream).toList()).hasSize(7);
 
         assertThat(weekViewItem).satisfies(item -> {
             assertThat(item.getDayList(LocalDate.of(2024, Month.APRIL, 15))).hasSize(1);

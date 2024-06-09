@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import ru.ancndz.timeapp.core.domain.AbstractEntity;
-import ru.ancndz.timeapp.core.domain.SoftDeletionSupported;
 import ru.ancndz.timeapp.user.domain.UserInfo;
 
 import java.time.LocalDate;
@@ -22,7 +21,7 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "timetable_schedule")
-public class TimesheetEntry extends AbstractEntity implements Comparable<TimesheetEntry>, SoftDeletionSupported {
+public class TimesheetEntry extends AbstractEntity implements Comparable<TimesheetEntry> {
 
     @ManyToOne
     private UserInfo worker;

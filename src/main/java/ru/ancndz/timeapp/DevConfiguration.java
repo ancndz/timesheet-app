@@ -180,13 +180,16 @@ public class DevConfiguration {
             storeContext.add(cooperateInfo);
 
             final LocalDate startOfWeek = WeekUtils.getWeekStartDate(LocalDate.now());
-            final TimesheetEntry timesheetEntry = TimesheetEntry.newEntry()
-                    .withWorker(worker.getUserInfo())
-                    .withClient(user.getUserInfo())
-                    .withEntryDate(getRandomDate(startOfWeek, startOfWeek.plusWeeks(1)))
-                    .withEntryTime(getRandomTime())
-                    .build();
-            storeContext.add(timesheetEntry);
+            final int entriesRandom = new Random().nextInt(2) + 1;
+            for (int j = 0; j < entriesRandom; j++) {
+                final TimesheetEntry timesheetEntry = TimesheetEntry.newEntry()
+                        .withWorker(worker.getUserInfo())
+                        .withClient(user.getUserInfo())
+                        .withEntryDate(getRandomDate(startOfWeek, startOfWeek.plusWeeks(1)))
+                        .withEntryTime(getRandomTime())
+                        .build();
+                storeContext.add(timesheetEntry);
+            }
         }
 
     }
