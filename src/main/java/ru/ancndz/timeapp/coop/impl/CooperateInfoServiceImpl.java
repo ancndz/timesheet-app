@@ -58,7 +58,7 @@ public class CooperateInfoServiceImpl implements CooperateInfoService {
                     .build();
         }
         storeService.store(new StoreContext(existing));
-        return existing;
+        return cooperateInfoRepository.findByClientIdAndWorkerId(clientId, workerId);
     }
 
     @Override
