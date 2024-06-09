@@ -10,7 +10,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.ValueProvider;
@@ -24,6 +23,7 @@ import ru.ancndz.timeapp.user.UserService;
 import ru.ancndz.timeapp.user.domain.UserInfo;
 
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Абстрактная таблица сотрудничества.
@@ -39,11 +39,14 @@ public abstract class AbstractCooperationGrid extends Grid<CooperateInfo> {
 
     protected final CooperateInfoService cooperateInfoService;
 
+    protected final List<CooperateInfo> cooperateInfoList;
+
     protected transient final UserInfo currentUserInfo;
 
     protected AbstractCooperationGrid(final CooperateInfoService cooperateInfoService, final UserInfo currentUserInfo) {
         this.cooperateInfoService = cooperateInfoService;
         this.currentUserInfo = currentUserInfo;
+        cooperateInfoList = cooperateInfoService.getWorkerCooperateInfos(currentUserInfo);
 
         setColumnRendering(ColumnRendering.LAZY);
         addClassName("cooperation-grid");
@@ -56,7 +59,7 @@ public abstract class AbstractCooperationGrid extends Grid<CooperateInfo> {
                 .setComparator(Comparator.comparing(info -> info.getClient().getName()))
                 .setSortable(true);
 
-        setDataProvider(DataProvider.ofCollection(cooperateInfoService.getWorkerCooperateInfos(currentUserInfo)));
+        setDataProvider(DataProvider.ofCollection(cooperateInfoList));
 
         setPartNameGenerator(cooperateInfo -> {
             if (!cooperateInfo.isActive()) {
@@ -109,9 +112,8 @@ public abstract class AbstractCooperationGrid extends Grid<CooperateInfo> {
             final Select<UserInfo> userSelect = new Select<>();
             userSelect.setItemLabelGenerator(item -> item.getName() + " " + item.getPhoneNumber());
 
-            searchField.addValueChangeListener(event -> {
-                userSelect.setItems(userService.searchUsersByValue(searchField.getValue()));
-            });
+            searchField.addValueChangeListener(
+                    event -> userSelect.setItems(userService.searchUsersByValue(searchField.getValue())));
 
             final TextField infoField = new TextField(getTranslation("app.field.coop.info"));
 
@@ -125,7 +127,8 @@ public abstract class AbstractCooperationGrid extends Grid<CooperateInfo> {
                             cooperateInfoService.createCooperateInfo(userSelect.getValue().getId(),
                                     currentUserInfo.getId(),
                                     infoField.getValue());
-                    ((ListDataProvider) getDataProvider()).getItems().add(newCoopInfo);
+                    newCoopInfo.setNew(false);
+                    cooperateInfoList.add(newCoopInfo);
                     getDataProvider().refreshAll();
                     addDialog.close();
                 } catch (ValidationException e) {
@@ -151,7 +154,7 @@ public abstract class AbstractCooperationGrid extends Grid<CooperateInfo> {
         return DeleteButton.newButton().withMainText(text).withConfirmListener(event -> {
             try {
                 cooperateInfoService.deleteCooperateInfo(info);
-                ((ListDataProvider) getDataProvider()).getItems().remove(info);
+                cooperateInfoList.remove(info);
                 getDataProvider().refreshAll();
             } catch (ValidationException e) {
                 Notification.show(String.join(", ", e.getErrors()), 3000, Notification.Position.BOTTOM_CENTER);

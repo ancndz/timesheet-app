@@ -1,6 +1,8 @@
 package ru.ancndz.timeapp.coop.impl;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import ru.ancndz.timeapp.coop.domain.CooperateInfo;
 import ru.ancndz.timeapp.coop.domain.QCooperateInfo;
 import ru.ancndz.timeapp.coop.domain.repo.CooperateInfoRepository;
@@ -21,15 +23,24 @@ public class CoopValidator implements DomainValidator {
 
     private final CooperateInfoRepository cooperateInfoRepository;
 
-    public CoopValidator(final CooperateInfoRepository cooperateInfoRepository) {
+    private final PlatformTransactionManager transactionManager;
+
+    public CoopValidator(final CooperateInfoRepository cooperateInfoRepository,
+            final PlatformTransactionManager transactionManager) {
         this.cooperateInfoRepository = cooperateInfoRepository;
+        this.transactionManager = transactionManager;
     }
 
     private boolean isCoopAlreadyExists(final CooperateInfo cooperateInfo) {
         final QCooperateInfo qCooperateInfo = QCooperateInfo.cooperateInfo;
-        return cooperateInfoRepository.exists(qCooperateInfo.worker.id.eq(cooperateInfo.getWorker().getId())
-                .and(qCooperateInfo.client.id.eq(cooperateInfo.getClient().getId()))
-                .and(qCooperateInfo.archivedAt.isNull()));
+        final TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setReadOnly(true);
+        transactionTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+
+        return Boolean.TRUE.equals(transactionTemplate.execute(
+                status -> cooperateInfoRepository.exists(qCooperateInfo.worker.id.eq(cooperateInfo.getWorker().getId())
+                        .and(qCooperateInfo.client.id.eq(cooperateInfo.getClient().getId()))
+                        .and(qCooperateInfo.archivedAt.isNull()))));
     }
 
     @Override
