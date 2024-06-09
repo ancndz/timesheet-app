@@ -112,7 +112,7 @@ public class User extends AbstractEntity implements UserDetails, CredentialsCont
     }
 
     public void setAuthorities(Collection<GrantedAuthority> authorities) {
-        this.authorities = Set.copyOf(authorities);
+        this.authorities = new HashSet<>(authorities);
     }
 
     public UserInfo getUserInfo() {
