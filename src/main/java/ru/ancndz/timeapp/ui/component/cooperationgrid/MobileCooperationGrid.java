@@ -64,7 +64,7 @@ public class MobileCooperationGrid extends AbstractCooperationGrid {
         final DatePicker coopDate = new DatePicker(getTranslation("app.field.coop.coop-date"), eventItem.getCoopDate());
         coopDate.setLocale(getLocale());
         coopDate.setReadOnly(true);
-        final TextField info = new TextField(getTranslation("app.coop.grid.info"));
+        final TextField info = new TextField(getTranslation("app.field.coop.info"));
 
         final FormLayout formLayout = new FormLayout();
         formLayout.add(firstName, phone, email, coopDate, info);

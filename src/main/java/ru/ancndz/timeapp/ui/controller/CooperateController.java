@@ -1,7 +1,6 @@
 package ru.ancndz.timeapp.ui.controller;
 
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -14,9 +13,9 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import jakarta.annotation.security.RolesAllowed;
 import ru.ancndz.timeapp.coop.CooperateInfoService;
+import ru.ancndz.timeapp.security.Role;
 import ru.ancndz.timeapp.ui.view.CooperationView;
 import ru.ancndz.timeapp.ui.view.LoginView;
-import ru.ancndz.timeapp.security.Role;
 import ru.ancndz.timeapp.user.domain.User;
 
 import java.util.Optional;
@@ -63,7 +62,6 @@ public class CooperateController extends Composite<VerticalLayout>
         authenticationContext.getAuthenticatedUser(User.class).ifPresentOrElse(user -> {
             cooperateInfoService.createCooperateInfo(clientId, user.getUserInfo().getId(), coopInfo.orElse(""));
             event.forwardTo(CooperationView.class);
-            Notification.show("Cooperation created!", 3000, Notification.Position.TOP_CENTER).addThemeName("success");
         }, () -> event.forwardTo(LoginView.class));
     }
 }
