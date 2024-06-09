@@ -28,7 +28,7 @@ import java.util.Locale;
 @SpringBootApplication
 @EnableAsync
 @EnableJpaAuditing
-@Import(value = { H2Configuration.class, DevConfiguration.class, SecurityConfig.class })
+@Import(value = { DevConfiguration.class, SecurityConfig.class })
 public class TimesheetApplication extends SpringBootServletInitializer {
 
     public static final Logger log = LoggerFactory.getLogger(TimesheetApplication.class);
